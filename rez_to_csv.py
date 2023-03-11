@@ -5,7 +5,7 @@ import PySimpleGUI as sg
 #define main function
 def main():
     #using PySimpleGUI find the folder with exports and pdfs
-    layout = [[sg.Text("Select folder of pdfs (Will work with all the pdfs in the folder)")],
+    layout = [[sg.Text("Select folder with exports and pdfs")],
                 [sg.Input(), sg.FolderBrowse()],
                 [sg.Button("Ok")]]
     window = sg.Window("Folder Browser", layout)
@@ -13,11 +13,20 @@ def main():
     window.close()
     #get the path of the selected folder
     path = values[0]
-    #get a list of all the files in the directory
+    #get the list of files in the folder
+    list_of_files = os.listdir(path)
+
+    #Get the pdf file and the chunk file
+    pdfFile = ""
+    chunkFile = open("export/chunk.csv", "r")
+    #loop through the list of files
+    for file in list_of_files:
+        if file.endswith(".pdf"):
+            pdfFile = file
+    pdfReader = PyPDF2.PdfReader(pdfFile)
     
 
-    #create a folder to store the csv files
-    #loop through the list of files
+
 
 
 
