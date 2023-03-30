@@ -1,5 +1,4 @@
 import os
-import PyPDF2
 import PySimpleGUI as sg
 
 #define main function
@@ -15,63 +14,70 @@ def main():
     path = values[0]
     #get the list of files in the folder
     list_of_folders = os.listdir(path)
+    #create a new folder to output to
+    os.mkdir(path + "/../outputs")
 
     #loop through the list of folders
     for folder in list_of_folders:
         list_of_files = os.listdir(path + "/" + folder)
-        #loop through the list of files
+        #read the chunk.csv file in the folder with utf-8 encoding
+        with open(path + "/" + folder + "/chunk.csv", encoding="utf-8") as f:
+            chunk_file = f.read()
+            #delete the first line of the chunk.csv file
+            chunk_file = chunk_file.split("\n", 1)[1]
+        #read the file csv file that starts with "AAHP" in the folder with utf-8 encoding
         for file in list_of_files:
-            #if the files begins with "AAHP" then open the file
             if file.startswith("AAHP"):
                 file_name = file
-                #Open the csv file with utf-8 encoding
-                transript_file = open(path + "/" + folder + "/" + file, "r", encoding="utf-8")
-                #read the file
-                transcript = transript_file.read()
-                #close the file
-                transript_file.close()
-            if file == "chunk.csv":
-                #open the csv file with utf-8 encoding
-                chunk_file = open(path + "/" + folder + "/" + file, "r", encoding="utf-8")
-                #read the file
-                chunk = chunk_file.read()
-                #close the file
-                chunk_file.close()
-        #Make changes to the transcript file to match output desired
-        #Split the transcript file into a list
-        transcript_list = transcript.split("\n")
-        #Replace the first line of the transcript file
-        transcript_list[0] = "Text, Chunk, Feature"
+                with open(path + "/" + folder + "/" + file, encoding="utf-8") as f:
+                    csv_file = f.read()
+                    #delete the first line of the csv file
+                    csv_file = csv_file.split("\n", 1)[1]
+                    csv_file = "Text, Chunk, Feature\n" + csv_file
+        #split the csv file into a list of lines
+        csv_file = csv_file.split("\n")
+        #split the chunk.csv file into a list of lines
+        chunk_file = chunk_file.split("\n")
+        #loop through the list of lines in the chunk.csv file
+        chunk_lines = []
+        for line in chunk_file:
+            #get rid of everything between quotation marks
+            first = line.find('"')
+            second = line.find('"', first + 1)
+            line = line[second + 2:]
+            #split the line by commas
+            line = line.split(",")
+            #add the split line to new variable
+            chunk_lines.append(line)
+        #loop through the list of lines in the csv file
+        new_csv_file = []
+        for line in csv_file:
+            for chunk in chunk_lines:
+                if line.find(chunk[0]) != -1:
+                    line = line + "," + chunk[0]
+                    chunk = chunk[1:]
+                    #join the chunk back together
+                    chunk = "".join(chunk)
+                    #get rid of all commas
+                    chunk = chunk.replace(",", "")
+                    #add the chunk to the line
+                    line = line + chunk
 
-        #Split the chunk file into a list
-        chunk_list = chunk.split("\n")
-        #Remove the first line of the chunk file
-        chunk_list.pop(0)
+            new_csv_file.append(line)
 
-        #Make a folder to store output files in at .py file location
-        if not os.path.exists("output"):
-            os.mkdir("output")
-        #create a file to write all outputs to in the output folder
-        output_file = open("output/" + file_name + ".csv", "w", encoding="utf-8")
 
-        #loop through the list of lines in the transcript file
-        for line in transcript_list:
-            #If the line contains a chunk then put the chunk in the next column
-            for chunk in chunk_list:
-                #Split the chunk into a list
-                chunk_split = chunk.split(",")
-                print(chunk_split)
-                #If the line contains the chunk then put the chunk in the next column
-                if chunk_split[2] in line:
-                    line = line + "," + chunk_split[2]
-                    #If the line contains the feature then put the feature in the next column
-                    for i in range(3, len(chunk_split)):
-                        if chunk_split[i] != "":
-                            line = line + "," + chunk_split[i]
-            #Write the line to the output file
-            output_file.write(line + "\n")
-        #Close the output file
-        output_file.close()
+        #write the new csv file to the outputs folder
+        with open(path + "/../outputs/" + file_name, "w", encoding="utf-8") as f:
+            for line in new_csv_file:
+                f.write(line + "\n")
+
+        
+
+            
+                
+
+        
+
                 
     
 
