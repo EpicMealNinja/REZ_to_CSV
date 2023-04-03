@@ -62,21 +62,41 @@ def main():
             #add the split line to new variable
             chunk_lines.append(line)
         #loop through the list of lines in the csv file
-        new_csv_file = []
-        for line in csv_file:
-            line_compare = tolower(line)
+        #new_csv_file = []
+        # for line in csv_file:
+        #     line_compare = tolower(line)
+        #     for chunk in chunk_lines:
+        #         if line_compare.find(chunk[0]) != -1:
+        #             line = line + "," + chunk[0]
+        #             for i in range(1, len(chunk)):
+        #                 if chunk[i] != ", " and chunk[i] != "" and chunk[i] != " ":
+        #                     line = line + "," + chunk[i]
+        #     new_csv_file.append(line)
+        i_iter = 0
+        for i in range(len(csv_file)):
+            i += i_iter
+            compare_line = tolower(csv_file[i])
+            repeat = False
             for chunk in chunk_lines:
-                if line_compare.find(chunk[0]) != -1:
-                    line = line + "," + chunk[0]
-                    for i in range(1, len(chunk)):
-                        if chunk[i] != ", " and chunk[i] != "" and chunk[i] != " ":
-                            line = line + "," + chunk[i]
+                if compare_line.find(chunk[0]) != -1:
+                    if not repeat:
+                        csv_file[i] = csv_file[i] + "," + chunk[0]
+                        for j in range(1, len(chunk)):
+                            if chunk[j] != ", " and chunk[j] != "" and chunk[j] != " ":
+                                csv_file[i] = csv_file[i] + "," + chunk[j]
+                        repeat = True
+                    elif repeat:
+                        new_line = csv_file[i].split(",")[0]
+                        new_line = new_line + "," + chunk[0]
+                        for j in range(1, len(chunk)):
+                            if chunk[j] != ", " and chunk[j] != "" and chunk[j] != " ":
+                                new_line = new_line + "," + chunk[j]
+                        csv_file.insert(i, new_line)
+                        i_iter += 1
 
-
-            new_csv_file.append(line)
         #write the new csv file to the outputs folder
         with open(path + "/../outputs/" + file_name, "w", encoding="utf-8") as f:
-            for line in new_csv_file:
+            for line in csv_file:
                 f.write(line + "\n")
 
         
