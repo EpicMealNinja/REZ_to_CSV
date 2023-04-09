@@ -77,6 +77,7 @@ def main():
             i += i_iter
             compare_line = tolower(csv_file[i])
             repeat = False
+            done = False
             for chunk in chunk_lines:
                 if compare_line.find(chunk[0]) != -1:
                     if not repeat:
@@ -93,6 +94,11 @@ def main():
                                 new_line = new_line + "," + chunk[j]
                         csv_file.insert(i, new_line)
                         i_iter += 1
+                        done = True
+            if done:
+                #Delete line at index i
+                csv_file = csv_file[:i] + csv_file[i+1:]
+                i_iter -= 1
 
         #write the new csv file to the outputs folder
         with open(path + "/../outputs/" + file_name, "w", encoding="utf-8") as f:
